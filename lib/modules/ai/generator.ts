@@ -101,7 +101,16 @@ Format as JSON:
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
+        let jsonString = jsonMatch[0];
+        jsonString = jsonString
+          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+          .replace(/\n/g, ' ')
+          .replace(/\r/g, '')
+          .replace(/\t/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        
+        const parsed = JSON.parse(jsonString);
         return {
           summary: parsed.summary || '',
           highlights: parsed.highlights || [],
@@ -119,7 +128,16 @@ Format as JSON:
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
+        let jsonString = jsonMatch[0];
+        jsonString = jsonString
+          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+          .replace(/\n/g, ' ')
+          .replace(/\r/g, '')
+          .replace(/\t/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        
+        const parsed = JSON.parse(jsonString);
         return {
           title: parsed.title || '',
           description: parsed.description || '',

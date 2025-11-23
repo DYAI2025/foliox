@@ -2,7 +2,7 @@
 
 import React from "react"
 import { GitHubCalendar } from "react-github-calendar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface ContributionGraphProps {
   username: string
@@ -23,36 +23,41 @@ export function ContributionGraph({ username }: ContributionGraphProps) {
 
   if (!mounted) {
     return (
-      <section className="w-full py-6">
-        <h2 className="text-2xl md:text-3xl font-bold mb-6">GitHub Activity</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Contribution Graph</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full h-[160px] rounded-xl bg-muted animate-pulse" />
-          </CardContent>
-        </Card>
+      <section className="w-full py-12 border-b border-border">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Contributions</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              GitHub activity over the past year
+            </p>
+          </div>
+          <Card className="border-border">
+            <CardContent className="p-8">
+              <div className="w-full h-[160px] bg-muted/50" />
+            </CardContent>
+          </Card>
+        </div>
       </section>
     )
   }
 
   return (
-    <section className="w-full py-6">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6">GitHub Activity</h2>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Contribution Graph</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full overflow-x-auto">
-            <div className="relative overflow-hidden rounded-xl p-3 hover:shadow-sm transition-shadow duration-300">
+    <section className="w-full py-12 border-b border-border">
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Contributions</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            GitHub activity over the past year
+          </p>
+        </div>
+        <Card className="border-border">
+          <CardContent className="p-8">
+            <div className="w-full overflow-x-auto">
               <GitHubCalendar
                 username={username}
-                fontSize={12}
-                blockSize={12}
-                blockMargin={4}
+                fontSize={11}
+                blockSize={11}
+                blockMargin={3}
                 showWeekdayLabels={true}
                 colorScheme="light"
                 theme={{
@@ -61,20 +66,20 @@ export function ContributionGraph({ username }: ContributionGraphProps) {
                 }}
               />
             </div>
-          </div>
-          <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-[#ebedf0] dark:bg-[#161b22]" />
-              <div className="w-3 h-3 rounded-sm bg-[#9be9a8] dark:bg-[#0e4429]" />
-              <div className="w-3 h-3 rounded-sm bg-[#40c463] dark:bg-[#006d32]" />
-              <div className="w-3 h-3 rounded-sm bg-[#30a14e] dark:bg-[#26a641]" />
-              <div className="w-3 h-3 rounded-sm bg-[#216e39] dark:bg-[#39d353]" />
+            <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+              <span>Less</span>
+              <div className="flex gap-1">
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#ebedf0] dark:bg-[#161b22]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#9be9a8] dark:bg-[#0e4429]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#40c463] dark:bg-[#006d32]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#30a14e] dark:bg-[#26a641]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#216e39] dark:bg-[#39d353]" />
+              </div>
+              <span>More</span>
             </div>
-            <span>More</span>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </section>
   )
 }

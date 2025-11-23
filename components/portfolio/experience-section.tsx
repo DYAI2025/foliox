@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Briefcase, GraduationCap } from "lucide-react"
+import { FaBriefcase, FaGraduationCap } from "react-icons/fa"
 import type { LinkedInData } from "@/types/portfolio"
 
 interface ExperienceSectionProps {
@@ -23,7 +23,7 @@ export function ExperienceSection({ linkedin }: ExperienceSectionProps) {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
+                <FaBriefcase className="h-5 w-5" />
                 Work Experience
               </CardTitle>
             </CardHeader>
@@ -48,7 +48,7 @@ export function ExperienceSection({ linkedin }: ExperienceSectionProps) {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
+                <FaGraduationCap className="h-5 w-5" />
                 Education
               </CardTitle>
             </CardHeader>

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { GitMerge, GitPullRequest, GitCommit, CircleDot, FolderGit2, Users } from "lucide-react"
+import { FaCodeBranch, FaCodePullRequest, FaCode, FaCircle, FaFolder, FaUsers } from "react-icons/fa6"
 import type { GitHubMetrics } from "@/types/github"
 
 interface MetricsSectionProps {
@@ -15,45 +15,46 @@ export function MetricsSection({ metrics, publicRepos, followers }: MetricsSecti
     {
       label: "PRs Merged",
       value: metrics.prs_merged.toLocaleString(),
-      icon: GitMerge,
+      icon: FaCodeBranch,
       color: "text-green-600",
     },
     {
       label: "Open PRs",
       value: metrics.prs_open.toLocaleString(),
-      icon: GitPullRequest,
+      icon: FaCodePullRequest,
       color: "text-blue-600",
     },
     {
       label: "Total Contributions",
       value: metrics.total_contributions.toLocaleString(),
-      icon: GitCommit,
+      icon: FaCode,
       color: "text-purple-600",
     },
     {
       label: "Issues Opened",
       value: metrics.issues_opened.toLocaleString(),
-      icon: CircleDot,
+      icon: FaCircle,
       color: "text-orange-600",
     },
     {
       label: "Repositories",
       value: publicRepos.toLocaleString(),
-      icon: FolderGit2,
+      icon: FaFolder,
       color: "text-indigo-600",
     },
     {
       label: "Followers",
       value: followers.toLocaleString(),
-      icon: Users,
+      icon: FaUsers,
       color: "text-pink-600",
     },
   ]
 
   return (
-    <section className="w-full py-6">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6">Metrics</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <section className="w-full py-16 border-b border-border">
+      <div className="space-y-8">
+        <h2 className="text-2xl font-semibold tracking-tight">Metrics</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (
@@ -70,6 +71,7 @@ export function MetricsSection({ metrics, publicRepos, followers }: MetricsSecti
             </Card>
           )
         })}
+        </div>
       </div>
     </section>
   )

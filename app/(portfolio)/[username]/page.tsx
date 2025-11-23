@@ -1,11 +1,11 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Topbar } from "@/components/portfolio/topbar"
 import { HeroSection } from "@/components/portfolio/hero-section"
-import { AboutSection } from "@/components/portfolio/about-section"
-import { ProjectsSection } from "@/components/portfolio/projects-section"
+import { CapabilitiesSection } from "@/components/portfolio/capabilities-section"
+import { WorkGallery } from "@/components/portfolio/work-gallery"
 import { ContributionGraph } from "@/components/portfolio/contribution-graph"
 import { MetricsSection } from "@/components/portfolio/metrics-section"
-import { PortfolioNavbar } from "@/components/portfolio/navbar"
 import { PortfolioFooter } from "@/components/portfolio/footer"
 import type { PortfolioData } from "@/types/portfolio"
 import { createAPIClient } from "@/lib/utils/api-client"
@@ -60,24 +60,29 @@ export default async function PortfolioPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <PortfolioNavbar username={username} name={data.profile.name} />
+      <Topbar profile={data.profile} />
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main className="container mx-auto px-4 max-w-6xl">
         <HeroSection profile={data.profile} about={data.about} />
         
-        <div className="space-y-8 mt-8">
+        <CapabilitiesSection about={data.about} />
+        
+        {data.profile.metrics && (
           <MetricsSection 
             metrics={data.profile.metrics} 
             publicRepos={data.profile.public_repos}
             followers={data.profile.followers}
           />
-          <AboutSection about={data.about} />
-          <ProjectsSection projects={data.projects} />
+        )}
+        
+        <WorkGallery projects={data.projects} />
+        
+        {data.projects && data.projects.featured.length > 0 && (
           <ContributionGraph username={username} />
-        </div>
+        )}
       </main>
 
-      <PortfolioFooter />
+      <PortfolioFooter profile={data.profile} />
     </div>
   )
 }

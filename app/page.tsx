@@ -16,7 +16,7 @@ export default function LandingPage() {
     if (!username.trim()) return
 
     setIsLoading(true)
-    router.push(`/portfolio/${username.trim()}`)
+    router.push(`/${username.trim()}`)
   }
 
   return (

@@ -117,6 +117,39 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .prose {
+    @apply text-foreground;
+  }
+  
+  .prose p {
+    @apply mb-6 leading-relaxed text-base;
+  }
+  
+  .prose p:last-child {
+    @apply mb-0;
+  }
+  
+  .prose a {
+    @apply text-primary hover:underline;
+  }
+  
+  .prose ul {
+    @apply list-disc list-inside space-y-2 mb-4;
+  }
+  
+  .prose em {
+    @apply italic text-muted-foreground;
+  }
+  
+  .prose i {
+    @apply not-italic cursor-pointer text-primary hover:underline;
   }
 }
