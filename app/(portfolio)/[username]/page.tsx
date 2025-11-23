@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { Topbar } from "@/components/portfolio/topbar"
 import { IntroductionSection } from "@/components/portfolio/introduction-section"
 import { CapabilitiesSection } from "@/components/portfolio/capabilities-section"
 import { WorkGallery } from "@/components/portfolio/work-gallery"
@@ -119,8 +118,6 @@ export default async function PortfolioPage({ params }: PageProps) {
     <div className="min-h-screen bg-background relative">
       <DiagonalPattern side="left" />
       <DiagonalPattern side="right" />
-      
-      <Topbar profile={data.profile} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
         <IntroductionSection profile={data.profile} />
