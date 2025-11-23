@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Github, Sparkles, Code2, Zap } from "lucide-react"
+import { FaGithub } from "react-icons/fa"
+import { BsStars, BsCodeSlash, BsLightningCharge } from "react-icons/bs"
 
 export default function LandingPage() {
   const [username, setUsername] = useState("")
@@ -25,7 +26,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-6 mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Sparkles className="h-4 w-4" />
+              <BsStars className="h-4 w-4" />
               <span>AI-Powered Portfolio Generator</span>
             </div>
 
@@ -43,7 +44,7 @@ export default function LandingPage() {
           <div className="max-w-md mx-auto mb-16">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
-                <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <FaGithub className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Enter GitHub username..."
@@ -66,7 +67,7 @@ export default function LandingPage() {
                 ) : (
                   <span className="flex items-center gap-2">
                     Generate Portfolio
-                    <Sparkles className="h-4 w-4" />
+                    <BsStars className="h-4 w-4" />
                   </span>
                 )}
               </Button>
@@ -85,7 +86,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <Github className="h-6 w-6 text-primary" />
+                <FaGithub className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-semibold text-lg mb-2">GitHub Integration</h3>
               <p className="text-sm text-muted-foreground">
@@ -95,7 +96,7 @@ export default function LandingPage() {
 
             <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <Sparkles className="h-6 w-6 text-primary" />
+                <BsStars className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-semibold text-lg mb-2">AI-Powered Insights</h3>
               <p className="text-sm text-muted-foreground">
@@ -105,7 +106,7 @@ export default function LandingPage() {
 
             <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-primary" />
+                <BsLightningCharge className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Instant Generation</h3>
               <p className="text-sm text-muted-foreground">
@@ -118,17 +119,17 @@ export default function LandingPage() {
             <p className="text-sm text-muted-foreground mb-4">Powered by</p>
             <div className="flex items-center justify-center gap-6 text-sm font-medium">
               <span className="flex items-center gap-2">
-                <Code2 className="h-4 w-4" />
+                <BsCodeSlash className="h-4 w-4" />
                 Next.js
               </span>
               <span>•</span>
               <span className="flex items-center gap-2">
-                <Github className="h-4 w-4" />
+                <FaGithub className="h-4 w-4" />
                 GitHub API
               </span>
               <span>•</span>
               <span className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
+                <BsStars className="h-4 w-4" />
                 Groq AI
               </span>
             </div>

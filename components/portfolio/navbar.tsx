@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Share2, Download } from "lucide-react"
+import { BsArrowLeft, BsShare, BsDownload } from "react-icons/bs"
 import Link from "next/link"
 
 interface NavbarProps {
@@ -43,7 +43,7 @@ export function PortfolioNavbar({ username, name }: NavbarProps) {
         <div className="flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <BsArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
           </Link>
@@ -55,7 +55,7 @@ export function PortfolioNavbar({ username, name }: NavbarProps) {
               onClick={handleShare}
               className="hidden sm:flex"
             >
-              <Share2 className="h-4 w-4 mr-2" />
+              <BsShare className="h-4 w-4 mr-2" />
               Share
             </Button>
             <Button
@@ -64,7 +64,7 @@ export function PortfolioNavbar({ username, name }: NavbarProps) {
               onClick={handleDownload}
               className="hidden md:flex"
             >
-              <Download className="h-4 w-4 mr-2" />
+              <BsDownload className="h-4 w-4 mr-2" />
               Download
             </Button>
             <Button
@@ -73,7 +73,7 @@ export function PortfolioNavbar({ username, name }: NavbarProps) {
               onClick={handleShare}
               className="sm:hidden"
             >
-              <Share2 className="h-4 w-4" />
+              <BsShare className="h-4 w-4" />
             </Button>
           </div>
         </div>

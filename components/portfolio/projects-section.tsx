@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Star, GitFork, ExternalLink, Github } from "lucide-react"
+import { BsStar, BsGit, BsBoxArrowUpRight } from "react-icons/bs"
+import { FaGithub } from "react-icons/fa"
 import type { ProjectsData } from "@/types/github"
 
 interface ProjectsSectionProps {
@@ -43,11 +44,11 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                   </div>
                 )}
                 <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4" />
+                  <BsStar className="h-4 w-4" />
                   <span>{project.stars}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <GitFork className="h-4 w-4" />
+                  <BsGit className="h-4 w-4" />
                   <span>{project.forks}</span>
                 </div>
               </div>
@@ -69,7 +70,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
                 >
-                  <Github className="h-4 w-4" />
+                  <FaGithub className="h-4 w-4" />
                   <span>GitHub</span>
                 </a>
                 {project.homepage && (
@@ -79,7 +80,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <BsBoxArrowUpRight className="h-4 w-4" />
                     <span>Live Site</span>
                   </a>
                 )}

@@ -9,6 +9,7 @@ import { MetricsSection } from "@/components/portfolio/metrics-section"
 import { PortfolioFooter } from "@/components/portfolio/footer"
 import type { PortfolioData } from "@/types/portfolio"
 import { createAPIClient } from "@/lib/utils/api-client"
+import { verifyUsername } from "@/lib/utils/user"
 
 interface PageProps {
   params: Promise<{ username: string }>
@@ -22,7 +23,16 @@ async function fetchPortfolioData(username: string): Promise<PortfolioData | nul
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { username } = await params
+  const { username: rawUsername } = await params
+  let username: string
+  try {
+    username = verifyUsername(rawUsername)
+  } catch {
+    return {
+      title: "Portfolio Not Found",
+      description: "The requested portfolio could not be found.",
+    }
+  }
   const data = await fetchPortfolioData(username)
 
   if (!data) {
@@ -51,7 +61,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PortfolioPage({ params }: PageProps) {
-  const { username } = await params
+  const { username: rawUsername } = await params
+  let username: string
+  try {
+    username = verifyUsername(rawUsername)
+  } catch {
+    notFound()
+  }
   const data = await fetchPortfolioData(username)
 
   if (!data) {

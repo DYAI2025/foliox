@@ -70,7 +70,8 @@ Write in a storytelling format that:
 2. Highlights (3-5 items) written as story beats - each should feel like a chapter in their journey, not just a bullet point. Use phrases like "From building X to achieving Y" or "Their journey led them to..."
 3. Skills (5-8 items) presented as areas where their expertise shines
 
-Format as JSON:
+IMPORTANT: Return ONLY valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object. Start with { and end with }.
+
 {
   "summary": "A narrative opening that tells their story...",
   "highlights": ["Story-driven highlight 1...", "Story-driven highlight 2..."],
@@ -89,7 +90,8 @@ Provide:
 2. Meta description (150-160 characters)
 3. 5-10 relevant keywords
 
-Format as JSON:
+IMPORTANT: Return ONLY valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object. Start with { and end with }.
+
 {
   "title": "...",
   "description": "...",
@@ -99,56 +101,48 @@ Format as JSON:
 
   private parseProfileSummary(content: string, profile: NormalizedProfile): AboutData {
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        let jsonString = jsonMatch[0];
-        jsonString = jsonString
-          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          .replace(/\n/g, ' ')
-          .replace(/\r/g, '')
-          .replace(/\t/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        
-        const parsed = JSON.parse(jsonString);
-        return {
-          summary: parsed.summary || '',
-          highlights: parsed.highlights || [],
-          skills: parsed.skills || [],
-        };
+      let jsonString = this.extractJSON(content);
+      if (!jsonString) {
+        console.error('No JSON found in AI response:', content.substring(0, 200));
+        return this.generateFallbackSummary(profile);
       }
+
+      jsonString = this.cleanJSON(jsonString);
+      const parsed = JSON.parse(jsonString);
+      
+      return {
+        summary: parsed.summary || '',
+        highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
+        skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+      };
     } catch (error) {
       console.error('Failed to parse AI response:', error);
+      console.error('Response content:', content.substring(0, 500));
+      return this.generateFallbackSummary(profile);
     }
-
-    return this.generateFallbackSummary(profile);
   }
 
   private parseSEOContent(content: string, profile: NormalizedProfile): SEOData {
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        let jsonString = jsonMatch[0];
-        jsonString = jsonString
-          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          .replace(/\n/g, ' ')
-          .replace(/\r/g, '')
-          .replace(/\t/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        
-        const parsed = JSON.parse(jsonString);
-        return {
-          title: parsed.title || '',
-          description: parsed.description || '',
-          keywords: parsed.keywords || [],
-        };
+      let jsonString = this.extractJSON(content);
+      if (!jsonString) {
+        console.error('No JSON found in SEO response:', content.substring(0, 200));
+        return this.generateFallbackSEO(profile);
       }
+
+      jsonString = this.cleanJSON(jsonString);
+      const parsed = JSON.parse(jsonString);
+      
+      return {
+        title: parsed.title || '',
+        description: parsed.description || '',
+        keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+      };
     } catch (error) {
       console.error('Failed to parse SEO response:', error);
+      console.error('Response content:', content.substring(0, 500));
+      return this.generateFallbackSEO(profile);
     }
-
-    return this.generateFallbackSEO(profile);
   }
 
   private generateFallbackSummary(profile: NormalizedProfile): AboutData {
@@ -173,6 +167,61 @@ Format as JSON:
       description: profile.bio || `${name}'s developer portfolio showcasing projects and contributions on GitHub.`,
       keywords: ['developer', 'portfolio', 'github', profile.username, 'software engineer'],
     };
+  }
+
+  private extractJSON(content: string): string | null {
+    if (!content) return null;
+
+    const trimmed = content.trim();
+
+    const markdownCodeBlockRegex = /```(?:json)?\s*(\{[\s\S]*\})\s*```/;
+    const markdownMatch = trimmed.match(markdownCodeBlockRegex);
+    if (markdownMatch && markdownMatch[1]) {
+      return markdownMatch[1].trim();
+    }
+
+    let braceCount = 0;
+    let startIndex = -1;
+    let endIndex = -1;
+
+    for (let i = 0; i < trimmed.length; i++) {
+      if (trimmed[i] === '{') {
+        if (startIndex === -1) {
+          startIndex = i;
+        }
+        braceCount++;
+      } else if (trimmed[i] === '}') {
+        braceCount--;
+        if (braceCount === 0 && startIndex !== -1) {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (startIndex !== -1 && endIndex !== -1) {
+      return trimmed.substring(startIndex, endIndex + 1);
+    }
+
+    const fallbackMatch = trimmed.match(/\{[\s\S]*\}/);
+    return fallbackMatch ? fallbackMatch[0] : null;
+  }
+
+  private cleanJSON(jsonString: string): string {
+    let cleaned = jsonString.trim();
+
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '');
+    cleaned = cleaned.replace(/\s*```$/i, '');
+
+    cleaned = cleaned.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+
+    cleaned = cleaned.replace(/,\s*}/g, '}');
+    cleaned = cleaned.replace(/,\s*]/g, ']');
+
+    const trailingCommaRegex = /,(\s*[}\]])/g;
+    cleaned = cleaned.replace(trailingCommaRegex, '$1');
+
+    return cleaned;
   }
 }
 

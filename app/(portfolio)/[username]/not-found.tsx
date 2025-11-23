@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, ArrowLeft, Home } from "lucide-react"
+import { BsExclamationCircle, BsArrowLeft, BsHouse } from "react-icons/bs"
 
 export default function NotFound() {
   return (
@@ -12,7 +12,7 @@ export default function NotFound() {
           <div className="max-w-lg w-full text-center space-y-8">
             <div className="flex justify-center">
               <div className="h-24 w-24 rounded-full bg-destructive/10 flex items-center justify-center border border-destructive/20">
-                <AlertCircle className="h-12 w-12 text-destructive" />
+                <BsExclamationCircle className="h-12 w-12 text-destructive" />
               </div>
             </div>
             
@@ -26,7 +26,7 @@ export default function NotFound() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
               <Link href="/">
                 <Button variant="default" size="lg" className="w-full sm:w-auto">
-                  <Home className="h-4 w-4 mr-2" />
+                  <BsHouse className="h-4 w-4 mr-2" />
                   Back to Home
                 </Button>
               </Link>
@@ -36,7 +36,7 @@ export default function NotFound() {
                 className="w-full sm:w-auto"
                 onClick={() => window.history.back()}
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <BsArrowLeft className="h-4 w-4 mr-2" />
                 Go Back
               </Button>
             </div>
