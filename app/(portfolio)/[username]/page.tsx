@@ -8,6 +8,7 @@ import { ProofOfWorkSection } from "@/components/portfolio/proof-of-work-section
 import { WorkExperienceSection } from "@/components/portfolio/work-experience-section"
 import { PRsByOrgSection } from "@/components/portfolio/prs-by-org-section"
 import { GetInTouchSection } from "@/components/portfolio/get-in-touch-section"
+import DiagonalPattern from "@/components/portfolio/diagonal-pattern"
 import type { PortfolioData } from "@/types/portfolio"
 import type { PRByOrg } from "@/components/portfolio/prs-by-org-section"
 import { createAPIClient } from "@/lib/utils/api-client"
@@ -115,10 +116,13 @@ export default async function PortfolioPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <DiagonalPattern side="left" />
+      <DiagonalPattern side="right" />
+      
       <Topbar profile={data.profile} />
 
-      <main className="container mx-auto px-4 sm:px-6 max-w-6xl">
+      <main className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
         <IntroductionSection profile={data.profile} />
         
         <CapabilitiesSection about={data.about} />

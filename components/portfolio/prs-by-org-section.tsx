@@ -4,6 +4,7 @@ import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { FaCodePullRequest, FaChevronDown } from "react-icons/fa6"
 import Link from "next/link"
+import SectionBorder from "./section-border"
 
 export interface PRByOrg {
   orgName: string;
@@ -73,7 +74,8 @@ export function PRsByOrgSection({ prsByOrg, username }: PRsByOrgSectionProps) {
   const hasMore = sortedPRs.length > 7;
 
   return (
-    <section className="w-full py-8 sm:py-12 md:py-16 border-b border-border">
+    <section className="relative w-full py-8 sm:py-12 md:py-16">
+      <SectionBorder className="absolute bottom-0 left-0 right-0" />
       <div className="space-y-6 sm:space-y-8">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Open Source Contributions</h2>

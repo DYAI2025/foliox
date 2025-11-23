@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaGithub, FaEnvelope, FaLinkedin, FaXTwitter, FaGlobe } from 'react-icons/fa6';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import type { NormalizedProfile } from '@/types/github';
+import SectionBorder from './section-border';
 
 interface IntroductionSectionProps {
   profile: NormalizedProfile;
@@ -54,7 +55,8 @@ export function IntroductionSection({ profile }: IntroductionSectionProps) {
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-6 py-8 sm:py-12 md:py-16 border-b border-border">
+    <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-6 py-8 sm:py-12 md:py-16">
+      <SectionBorder className="absolute bottom-0 left-0 right-0" />
       <div className="flex-1">
         <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-2 text-foreground">
           {profile.name || profile.username}

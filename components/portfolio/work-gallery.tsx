@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { FaExternalLinkAlt, FaGithub } from "react-icons/fa"
 import Image from "next/image"
 import type { ProjectsData } from "@/types/github"
+import SectionBorder from "./section-border"
 
 interface WorkGalleryProps {
   projects?: ProjectsData
@@ -13,7 +14,8 @@ export function WorkGallery({ projects }: WorkGalleryProps) {
   if (!projects || projects.featured.length === 0) return null
 
   return (
-    <section className="w-full py-8 sm:py-12 md:py-16 border-b border-border">
+    <section className="relative w-full py-8 sm:py-12 md:py-16">
+      <SectionBorder className="absolute bottom-0 left-0 right-0" />
       <div className="space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 sm:gap-4">
           <div>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { GitHubCalendar } from 'react-github-calendar';
 import { Card, CardContent } from '@/components/ui/card';
+import SectionBorder from './section-border';
 
 interface ProofOfWorkSectionProps {
   username: string;
@@ -21,7 +22,8 @@ export function ProofOfWorkSection({ username }: ProofOfWorkSectionProps) {
   };
 
   return (
-    <section className="w-full py-8 sm:py-12 md:py-16 border-b border-border">
+    <section className="relative w-full py-8 sm:py-12 md:py-16">
+      <SectionBorder className="absolute bottom-0 left-0 right-0" />
       <div className="space-y-6 sm:space-y-8">
         <div>
           <h2 className="font-bold text-2xl md:text-4xl tracking-tight text-foreground">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaBriefcase } from 'react-icons/fa';
 import type { NormalizedProfile } from '@/types/github';
+import SectionBorder from './section-border';
 
 interface WorkExperienceSectionProps {
   profile: NormalizedProfile;
@@ -12,7 +13,8 @@ export function WorkExperienceSection({ profile }: WorkExperienceSectionProps) {
   }
 
   return (
-    <section className="w-full py-8 sm:py-12 md:py-16 border-b border-border">
+    <section className="relative w-full py-8 sm:py-12 md:py-16">
+      <SectionBorder className="absolute bottom-0 left-0 right-0" />
       <div className="space-y-6 sm:space-y-8">
         <div>
           <h2 className="font-bold text-2xl md:text-4xl tracking-tight text-foreground">
