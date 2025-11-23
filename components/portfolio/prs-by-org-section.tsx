@@ -76,7 +76,7 @@ export function PRsByOrgSection({ prsByOrg, username }: PRsByOrgSectionProps) {
     <section className="w-full py-8 sm:py-12 md:py-16 border-b border-border">
       <div className="space-y-6 sm:space-y-8">
         <div>
-          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Contributions by Organization</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Open Source Contributions</h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Pull requests across different organizations
           </p>
