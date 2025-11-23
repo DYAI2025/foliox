@@ -9,7 +9,7 @@ const ALLOWED_ORIGINS = [
 
 const EXCLUDED_PATHS = ['/api/docs', '/api/openapi.json', '/_next', '/favicon.ico'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (EXCLUDED_PATHS.some(path => pathname.startsWith(path))) {
