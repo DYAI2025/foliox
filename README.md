@@ -142,10 +142,6 @@ foliox/
 - `GET /api/user/[username]/contributions` - Get contribution graph data
 - `GET /api/user/[username]/prs-by-org` - Get pull requests grouped by organization
 
-### GitHub
-
-- `GET /api/github/stars` - Fetch current star count for the Foliox repository (no caching, real-time)
-
 ### Custom URLs
 
 - `POST /api/custom-url/check` - Check if a custom URL slug is available
@@ -227,8 +223,6 @@ The application uses a database-backed caching system for most endpoints:
 - Tag-based cache organization for easy invalidation
 - Cache is checked before making external API calls
 - Most portfolio endpoints use caching to reduce API calls and improve performance
-
-**Note**: Some endpoints like `/api/github/stars` intentionally bypass caching to provide real-time data. These endpoints use `cache: "no-store"` and appropriate cache-control headers to ensure fresh data on every request.
 
 ## Deployment
 

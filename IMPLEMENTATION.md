@@ -25,8 +25,6 @@ foliox/
 │   │   ├── custom-url/
 │   │   │   ├── check/route.ts    # POST /api/custom-url/check
 │   │   │   └── register/route.ts  # POST /api/custom-url/register
-│   │   ├── github/
-│   │   │   └── stars/route.ts           # GET /api/github/stars (no caching)
 │   │   ├── user/
 │   │   │   └── [username]/
 │   │   │       ├── profile/route.ts      # GET /api/user/:username/profile
@@ -186,20 +184,6 @@ Fetches pull requests grouped by organization.
 }
 ```
 
-### GitHub Endpoints
-
-#### 6. GET `/api/github/stars`
-Fetches the current star count for the Foliox repository. This endpoint intentionally bypasses all caching to provide real-time data.
-
-**Response:**
-```json
-{
-  "stars": 42
-}
-```
-
-**Note**: This endpoint does not use database caching. It fetches directly from GitHub API on every request with proper authentication fallback (retries without token if 401 occurs).
-
 ### Custom URL Endpoints
 
 #### 7. POST `/api/custom-url/check`
@@ -306,7 +290,6 @@ All API endpoints require an `X-API-Key` header (except when `DEBUG=true`). The 
 - Default TTL: 3600 seconds (1 hour)
 - Configurable via `CACHE_ENABLED` and `DEFAULT_CACHE_TTL` environment variables
 - Most portfolio endpoints use caching to reduce API calls
-- Some endpoints (like `/api/github/stars`) intentionally bypass caching for real-time data
 - Cache-aware endpoints check cache before making external API calls
 
 ### 5. Custom URL System (`lib/utils/custom-url.ts`)
@@ -331,15 +314,6 @@ All API endpoints require an `X-API-Key` header (except when `DEBUG=true`). The 
 - Filters out forks and private repositories
 - Returns top 12 featured projects
 - Aggregates language statistics across all repositories
-
-### 8. GitHub Stars Endpoint (`app/api/github/stars/route.ts`)
-- Fetches real-time star count for the Foliox repository
-- **No caching**: Intentionally bypasses all caching mechanisms for real-time data
-- Uses GitHub REST API with proper authentication headers
-- Includes required `X-GitHub-Api-Version: 2022-11-28` header
-- Automatic fallback: If authentication fails (401), retries without token (public repos don't require auth)
-- Sets cache-control headers to prevent any proxy/CDN caching
-- Graceful error handling: Returns `{ stars: 0 }` on failure instead of throwing errors
 
 ## Database Schema
 
@@ -379,8 +353,7 @@ Optional:
 
 1. **GraphQL over REST**: Single query fetches all required GitHub data
 2. **Database-backed caching**: Persistent cache across deployments for most endpoints
-3. **Selective caching**: Some endpoints (like `/api/github/stars`) intentionally bypass cache for real-time data
-4. **Parallel AI generation**: About and SEO data generated concurrently
+3. **Parallel AI generation**: About and SEO data generated concurrently
 5. **Automatic cache cleanup**: Expired entries removed automatically (1% chance on each write)
 6. **Indexed database queries**: Fast lookups for cache and custom URLs
 7. **Next.js App Router**: Server components for optimal performance

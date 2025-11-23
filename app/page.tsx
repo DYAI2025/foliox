@@ -1,34 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Github, Wand2, Star } from "lucide-react"
+import { Github, Wand2 } from "lucide-react"
 import Link from "next/link"
 import { trackEvent } from "@/lib/utils/analytics"
 
 export default function LandingPage() {
   const [username, setUsername] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [starCount, setStarCount] = useState<number | null>(null)
-  const [isStarAnimating, setIsStarAnimating] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    const fetchStars = async () => {
-      try {
-        const response = await fetch("/api/github/stars")
-        const data = await response.json()
-        const stars = typeof data.stars === "number" ? data.stars : 0
-        setStarCount(stars)
-      } catch {
-        setStarCount(null)
-      }
-    }
-    fetchStars()
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,25 +46,10 @@ export default function LandingPage() {
             href="https://github.com/kartiklabhshetwar/foliox" 
             target="_blank" 
             rel="noreferrer"
-            onMouseEnter={() => setIsStarAnimating(true)}
-            onMouseLeave={() => setIsStarAnimating(false)}
           >
-            <Button variant="ghost" size="sm" className="gap-2 group">
-              <div className="flex items-center gap-1.5">
-                <Star 
-                  className={`h-4 w-4 transition-all duration-300 ${
-                    isStarAnimating 
-                      ? "fill-primary text-primary scale-110 rotate-12" 
-                      : "fill-none"
-                  }`}
-                />
-                {typeof starCount === "number" && starCount >= 0 && (
-                  <span className="text-sm font-medium tabular-nums">
-                    {starCount.toLocaleString()}
-                  </span>
-                )}
-                <span className="hidden sm:inline">Star on GitHub</span>
-              </div>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">GitHub</span>
             </Button>
           </Link>
         </div>
