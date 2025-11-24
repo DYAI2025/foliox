@@ -22,14 +22,14 @@ export interface CachedProfileResult {
 
 export async function resolveProfile(
   username: string,
-  options: CacheOptions = {}
+  options: CacheOptions & { userToken?: string | null } = {}
 ): Promise<CachedProfileResult> {
   const cacheKey = getCacheKey(PROFILE_CACHE_PREFIX, username);
   const tags = buildProfileTags(username, options.tags);
   const ttl = options.ttl ?? Settings.DEFAULT_CACHE_TTL;
 
   const cachedProfile = await getCache<NormalizedProfile>(cacheKey);
-  if (cachedProfile) {
+  if (cachedProfile && !options.userToken) {
     const profileWithCacheFlag = {
       ...cachedProfile,
       cached: true as const,
@@ -41,7 +41,7 @@ export async function resolveProfile(
     };
   }
 
-  const freshProfile = await generatePortfolioProfile(username);
+  const freshProfile = await generatePortfolioProfile(username, options.userToken);
   const profileToCache = { ...freshProfile, cached: false };
 
   await setCache(cacheKey, profileToCache, { ttl, tags });

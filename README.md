@@ -58,6 +58,9 @@ DATABASE_URL=postgresql://user:password@host:port/database
 
 # Optional
 GITHUB_TOKEN=your_github_token
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 CACHE_ENABLED=true
 DEFAULT_CACHE_TTL=3600
 DEBUG=false
@@ -211,7 +214,7 @@ npx prisma migrate dev
 
 ### Optional
 
-- `GITHUB_TOKEN`: GitHub personal access token (increases rate limits)
+- `GITHUB_TOKEN`: GitHub personal access token (increases rate limits and enables private repository access)
 - `CACHE_ENABLED`: Enable/disable caching (default: true)
 - `DEFAULT_CACHE_TTL`: Cache time-to-live in seconds (default: 3600)
 - `DEBUG`: Bypass API key authentication (default: false)
@@ -307,6 +310,38 @@ Verify that the `X-API-Key` header matches one of the keys in the `API_KEYS` env
 ### GitHub User Not Found
 
 Check the username spelling and ensure the GitHub user exists and is public. If you're rate-limited, add a `GITHUB_TOKEN` to increase your rate limit.
+
+### Private Repository Access with GitHub OAuth
+
+To enable users to access their private repositories:
+
+1. **Create a GitHub OAuth App**:
+   - Go to GitHub Settings → Developer settings → OAuth Apps
+   - Click "New OAuth App"
+   - Set Application name: "Foliox" (or your app name)
+   - Set Homepage URL: `http://localhost:3000` (or your production URL)
+   - Set Authorization callback URL: `http://localhost:3000/api/auth/callback/github` (or your production callback URL)
+   - Click "Register application"
+   - Copy the **Client ID** and generate a **Client Secret**
+
+2. **Set OAuth credentials in your environment**:
+   ```env
+   GITHUB_CLIENT_ID=your_client_id_here
+   GITHUB_CLIENT_SECRET=your_client_secret_here
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   ```
+
+3. **How it works**:
+   - Users can click "Sign in with GitHub" on the landing page
+   - After authentication, their GitHub access token is securely stored
+   - When viewing their own portfolio, private repositories are automatically included
+   - The system uses the user's token to fetch both public and private repos
+   - Other users' portfolios will only show public repositories (as expected)
+
+4. **Server-side token (optional)**:
+   - You can still set `GITHUB_TOKEN` for server-side operations
+   - This is used as a fallback when no user is authenticated
+   - Useful for public portfolio generation without user login
 
 ### Database Connection Issues
 

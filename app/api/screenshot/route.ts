@@ -34,20 +34,54 @@ async function fetchScreenshot(params: ScreenshotParams): Promise<Buffer> {
 
   const apiUrl = `${screenshotApiUrl}/take?${searchParams.toString()}`;
 
-  const response = await fetch(apiUrl, {
-    method: 'GET',
-    headers: {
-      'Accept': format === 'pdf' ? 'application/pdf' : `image/${format}`,
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`Screenshot API failed: ${response.status} ${errorText}`);
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': format === 'pdf' ? 'application/pdf' : `image/${format}`,
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      let errorMessage = `Screenshot API failed: ${response.status}`;
+      
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.error) {
+          errorMessage = errorJson.error;
+        } else if (errorJson.details) {
+          errorMessage = `${errorJson.error || 'Screenshot failed'}: ${errorJson.details}`;
+        }
+      } catch {
+        if (errorText && errorText.length < 200) {
+          errorMessage = errorText;
+        }
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError' || error.message.includes('timeout')) {
+        throw new Error('TIMEOUT');
+      }
+      throw error;
+    }
+    
+    throw new Error('Unknown error occurred while fetching screenshot');
   }
-
-  const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
 }
 
 export async function GET(request: NextRequest) {
@@ -97,6 +131,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const failureCacheKey = getCacheKey('screenshot_failure', url);
+    const failureData = await getCache<{ count: number; lastFailure: string }>(failureCacheKey);
+    
+    if (failureData && failureData.count >= 3) {
+      return NextResponse.json(
+        { 
+          error: 'Screenshot permanently failed',
+          details: `This URL has failed ${failureData.count} times. Using fallback image.`,
+          fallback: 'Please use the GitHub OpenGraph image as fallback'
+        },
+        { status: 410 }
+      );
+    }
+
     const cacheKey = getCacheKey('screenshot', url, width.toString(), height.toString(), fullPage.toString(), format, quality.toString());
     
     const cachedScreenshot = await getCache<{ data: string; contentType: string }>(cacheKey);
@@ -139,6 +187,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const targetUrl = request.nextUrl.searchParams.get('url');
     
     if (errorMessage.includes('not configured')) {
       return NextResponse.json(
@@ -147,10 +196,38 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.error('Screenshot API error:', error);
+    const isTimeout = errorMessage === 'TIMEOUT' || errorMessage.includes('timeout');
+    const statusCode = isTimeout ? 408 : 500;
+
+    if (targetUrl) {
+      const failureCacheKey = getCacheKey('screenshot_failure', targetUrl);
+      const failureData = await getCache<{ count: number; lastFailure: string }>(failureCacheKey);
+      const newCount = (failureData?.count || 0) + 1;
+      
+      await setCache(
+        failureCacheKey,
+        { count: newCount, lastFailure: new Date().toISOString() },
+        {
+          ttl: 30 * 24 * 60 * 60,
+          tags: ['screenshot_failure', `url:${targetUrl}`],
+        }
+      );
+    }
+
+    console.error('Screenshot API error:', {
+      url: targetUrl,
+      error: errorMessage,
+      isTimeout,
+      timestamp: new Date().toISOString(),
+    });
+
     return NextResponse.json(
-      { error: `Failed to capture screenshot: ${errorMessage}` },
-      { status: 500 }
+      { 
+        error: isTimeout ? 'Screenshot request timed out' : 'Screenshot failed',
+        details: isTimeout ? 'The screenshot service took too long to respond' : errorMessage,
+        fallback: 'Please use the GitHub OpenGraph image as fallback'
+      },
+      { status: statusCode }
     );
   }
 }

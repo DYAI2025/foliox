@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ProjectImageProps {
   src: string
@@ -22,28 +22,63 @@ export function ProjectImage({
   sizes, 
   unoptimized 
 }: ProjectImageProps) {
-  const [imageSrc, setImageSrc] = useState(src)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoaded(false)
+      setHasError(false)
+    }, 100)
+  }, [src])
 
   const handleError = () => {
-    if (imageSrc !== fallbackSrc) {
-      setImageSrc(fallbackSrc)
-    }
+    setHasError(true)
+    setTimeout(() => {
+      setIsLoaded(false)
+    }, 100)
   }
 
+  const handleLoad = () => {
+    setTimeout(() => {
+      setIsLoaded(true)
+    }, 100)
+  }
+
+  const shouldShowMainImage = src !== fallbackSrc && !hasError
+
   return (
-    <Image
-      src={imageSrc}
-      alt={alt}
-      fill={fill}
-      className={`${className || ''} object-cover object-center`}
-      sizes={sizes}
-      unoptimized={unoptimized}
-      onError={handleError}
-      style={{
-        objectFit: 'cover',
-        objectPosition: 'center',
-      }}
-    />
+    <>
+      <Image
+        src={fallbackSrc}
+        alt={alt}
+        fill={fill}
+        className={`${className || ''} object-cover object-center`}
+        sizes={sizes}
+        unoptimized={unoptimized}
+        priority={false}
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center',
+        }}
+      />
+      {shouldShowMainImage && (
+        <Image
+          src={src}
+          alt={alt}
+          fill={fill}
+          className={`${className || ''} object-cover object-center transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          sizes={sizes}
+          unoptimized={unoptimized}
+          onError={handleError}
+          onLoad={handleLoad}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+          }}
+        />
+      )}
+    </>
   )
 }
 

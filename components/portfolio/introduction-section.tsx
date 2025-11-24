@@ -5,6 +5,8 @@ import { FaMapMarkerAlt } from 'react-icons/fa';
 import type { NormalizedProfile } from '@/types/github';
 import SectionBorder from './section-border';
 import { ShareButton } from './share-button';
+import { UserMenu } from '@/components/auth/user-menu';
+import { GitHubLoginButton } from '@/components/auth/github-login-button';
 
 interface IntroductionSectionProps {
   profile: NormalizedProfile;
@@ -61,11 +63,15 @@ export function IntroductionSection({ profile }: IntroductionSectionProps) {
       <div className="flex items-center justify-between mb-6">
         <Link href="/" className="hover:opacity-80 transition-opacity">
         <span className="text-xl text-foreground font-bold">
-              <span className="font-[var(--font-playfair)] italic font-normal">folio</span>
+              <span className="font-[var(--font-playfair)] italic">folio</span>
               <span className="font-sans">x</span>
         </span>
         </Link>
-        <ShareButton username={profile.username} />
+        <div className="flex items-center gap-2">
+          <UserMenu />
+          <GitHubLoginButton />
+          <ShareButton username={profile.username} />
+        </div>
       </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div className="flex-1 order-2 sm:order-1">

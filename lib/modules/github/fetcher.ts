@@ -3,15 +3,15 @@ import { Settings } from '@/lib/config/settings';
 import { NormalizedProfile, GitHubGraphQLUser, GitHubMetrics } from '@/types/github';
 import { parseSocialLinksFromReadme } from '@/lib/utils/readme-parser';
 
-const graphqlWithAuth = Settings.GITHUB_TOKEN
-  ? graphql.defaults({
-      headers: {
-        authorization: `Bearer ${Settings.GITHUB_TOKEN}`,
-      },
-    })
-  : graphql;
+function getGraphQLClient(token: string) {
+  return graphql.defaults({
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+}
 
-const USER_QUERY = `
+const USER_QUERY_PUBLIC = `
   query($username: String!) {
     user(login: $username) {
       login
@@ -30,6 +30,101 @@ const USER_QUERY = `
         totalCount
       }
       repositories(first: 100, privacy: PUBLIC, orderBy: {field: UPDATED_AT, direction: DESC}) {
+        totalCount
+        nodes {
+          name
+          description
+          url
+          homepageUrl
+          stargazerCount
+          forkCount
+          primaryLanguage {
+            name
+            color
+          }
+          languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+          repositoryTopics(first: 10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          isPrivate
+          isFork
+          updatedAt
+          createdAt
+        }
+      }
+      pinnedItems(first: 6, types: REPOSITORY) {
+        nodes {
+          ... on Repository {
+            name
+            description
+            url
+            homepageUrl
+            stargazerCount
+            forkCount
+            primaryLanguage {
+              name
+              color
+            }
+            languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+            repositoryTopics(first: 10) {
+              nodes {
+                topic {
+                  name
+                }
+              }
+            }
+            isPrivate
+            isFork
+            updatedAt
+            createdAt
+          }
+        }
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const USER_QUERY_ALL = `
+  query($username: String!) {
+    user(login: $username) {
+      login
+      name
+      bio
+      avatarUrl
+      location
+      email
+      websiteUrl
+      twitterUsername
+      company
+      followers {
+        totalCount
+      }
+      following {
+        totalCount
+      }
+      repositories(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
         totalCount
         nodes {
           name
@@ -126,8 +221,9 @@ const PR_STATS_QUERY = `
 `;
 
 export class GitHubProfileFetcher {
-  static async fetchPRStatistics(username: string): Promise<GitHubMetrics> {
-    if (!Settings.GITHUB_TOKEN) {
+  static async fetchPRStatistics(username: string, userToken?: string | null): Promise<GitHubMetrics> {
+    const token = userToken || Settings.GITHUB_TOKEN;
+    if (!token) {
       return {
         prs_merged: 0,
         prs_open: 0,
@@ -137,8 +233,10 @@ export class GitHubProfileFetcher {
       };
     }
 
+    const graphqlClient = getGraphQLClient(token);
+
     try {
-      const result = await graphqlWithAuth<{
+      const result = await graphqlClient<{
         user: {
           mergedPRs: {
             totalCount: number;
@@ -192,10 +290,13 @@ export class GitHubProfileFetcher {
     }
   }
 
-  static async fetchReadmeContent(username: string): Promise<string | null> {
-    if (!Settings.GITHUB_TOKEN) {
+  static async fetchReadmeContent(username: string, userToken?: string | null): Promise<string | null> {
+    const token = userToken || Settings.GITHUB_TOKEN;
+    if (!token) {
       return null;
     }
+
+    const graphqlClient = getGraphQLClient(token);
 
     try {
       const readmeQuery = `
@@ -212,7 +313,7 @@ export class GitHubProfileFetcher {
         }
       `;
 
-      const result = await graphqlWithAuth<{
+      const result = await graphqlClient<{
         user: {
           repository: {
             object: { text: string } | null;
@@ -248,13 +349,18 @@ export class GitHubProfileFetcher {
     }
   }
 
-  static async fetchUserProfile(username: string): Promise<NormalizedProfile> {
-    if (!Settings.GITHUB_TOKEN) {
-      throw new Error('GITHUB_TOKEN is required. Please set it in your environment variables.');
+  static async fetchUserProfile(username: string, userToken?: string | null): Promise<NormalizedProfile> {
+    const token = userToken || Settings.GITHUB_TOKEN;
+    if (!token) {
+      throw new Error('GitHub token is required. Please authenticate or set GITHUB_TOKEN in your environment variables.');
     }
 
+    const graphqlClient = getGraphQLClient(token);
+    const isAuthenticatedUser = userToken !== null;
+    const query = isAuthenticatedUser ? USER_QUERY_ALL : USER_QUERY_PUBLIC;
+
     try {
-      const result = await graphqlWithAuth<{ user: GitHubGraphQLUser }>(USER_QUERY, {
+      const result = await graphqlClient<{ user: GitHubGraphQLUser }>(query, {
         username,
       });
 
@@ -276,7 +382,7 @@ export class GitHubProfileFetcher {
       }
 
       try {
-        const readmeContent = await this.fetchReadmeContent(username);
+        const readmeContent = await this.fetchReadmeContent(username, token);
         if (readmeContent) {
           const socialLinks = parseSocialLinksFromReadme(readmeContent, username);
           if (!linkedinUrl && socialLinks.linkedin) {
@@ -321,7 +427,7 @@ export class GitHubProfileFetcher {
         }
       };
 
-      const metrics = await this.fetchPRStatistics(username);
+      const metrics = await this.fetchPRStatistics(username, token);
 
       const normalizedProfile: NormalizedProfile = {
         username: user.login,
@@ -361,13 +467,18 @@ export class GitHubProfileFetcher {
     }
   }
 
-  static async fetchUserRepositories(username: string) {
-    if (!Settings.GITHUB_TOKEN) {
-      throw new Error('GITHUB_TOKEN is required. Please set it in your environment variables.');
+  static async fetchUserRepositories(username: string, userToken?: string | null) {
+    const token = userToken || Settings.GITHUB_TOKEN;
+    if (!token) {
+      throw new Error('GITHUB_TOKEN is required. Please set it in your environment variables or authenticate.');
     }
 
+    const graphqlClient = getGraphQLClient(token);
+    const isAuthenticatedUser = userToken !== null;
+    const query = isAuthenticatedUser ? USER_QUERY_ALL : USER_QUERY_PUBLIC;
+
     try {
-      const result = await graphqlWithAuth<{ user: GitHubGraphQLUser }>(USER_QUERY, {
+      const result = await graphqlClient<{ user: GitHubGraphQLUser }>(query, {
         username,
       });
 

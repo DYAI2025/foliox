@@ -3,11 +3,13 @@ import { GitHubProjectRanker } from '@/lib/modules/github/projects';
 import { verifyUsername } from '@/lib/utils/user';
 import { createCachedFunction } from '@/lib/utils/cache';
 import { ProjectsData } from '@/types/github';
+import { getSessionUserToken } from '@/lib/utils/github-token';
 
-function getCachedProjects(username: string) {
+function getCachedProjects(username: string, userToken?: string | null) {
+  const cacheKey = userToken ? `github_projects_${username}_auth` : `github_projects_${username}`;
   const cachedFn = createCachedFunction(
-    () => GitHubProjectRanker.getFeatured(username),
-    ['github_projects', username],
+    () => GitHubProjectRanker.getFeatured(username, userToken),
+    [cacheKey, username],
     {
       ttl: 3600,
       tags: ['github_projects', `user:${username}`],
@@ -24,7 +26,8 @@ export async function GET(
     const { username: rawUsername } = await context.params;
     const username = verifyUsername(rawUsername);
 
-    const projectData = await getCachedProjects(username);
+    const userToken = await getSessionUserToken(request);
+    const projectData = await getCachedProjects(username, userToken);
 
     return NextResponse.json(projectData, { status: 200 });
   } catch (error) {

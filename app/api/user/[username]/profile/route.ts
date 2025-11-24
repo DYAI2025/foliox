@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyUsername } from '@/lib/utils/user';
 import { resolveProfile } from '@/lib/services/profile-cache';
+import { getSessionUserToken } from '@/lib/utils/github-token';
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +11,8 @@ export async function GET(
     const { username: rawUsername } = await context.params;
     const username = verifyUsername(rawUsername);
 
-    const { profile } = await resolveProfile(username);
+    const userToken = await getSessionUserToken(request);
+    const { profile } = await resolveProfile(username, { userToken });
 
     return NextResponse.json(profile, { status: 200 });
   } catch (error: unknown) {

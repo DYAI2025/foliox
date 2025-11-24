@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,9 @@ import { FaStar } from "react-icons/fa"
 import Link from "next/link"
 import { trackEvent } from "@/lib/utils/analytics"
 import { useDebounce } from "@/lib/utils/debounce"
+import { GitHubLoginButton } from "@/components/auth/github-login-button"
+import { UserMenu } from "@/components/auth/user-menu"
+import { useSession } from "@/lib/auth-client"
 import type { NormalizedProfile } from "@/types/github"
 
 export default function LandingPage() {
@@ -22,6 +25,8 @@ export default function LandingPage() {
   const [starCount, setStarCount] = useState(0)
   const [displayedStars, setDisplayedStars] = useState(0)
   const router = useRouter()
+  const pathname = usePathname()
+  const { data: session, isPending: isSessionPending } = useSession()
 
   useEffect(() => {
     const fetchStarCount = async () => {
@@ -38,6 +43,35 @@ export default function LandingPage() {
 
     fetchStarCount()
   }, [])
+
+  useEffect(() => {
+    if (!session?.user || isSessionPending) {
+      return;
+    }
+
+    if (pathname !== "/") {
+      return;
+    }
+
+    const redirectToPortfolio = async () => {
+      try {
+        const response = await fetch("/api/auth/get-github-username");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.username) {
+            router.push(`/${data.username}`);
+          }
+        }
+      } catch {
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      redirectToPortfolio();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [session, isSessionPending, router, pathname])
 
   useEffect(() => {
     if (starCount === 0) return
@@ -157,12 +191,15 @@ export default function LandingPage() {
             </span>
           </Link>
 
-          <Link
-            href="https://github.com/kartiklabhshetwar/foliox"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden md:flex items-center justify-center gap-1.5 outline-none transition-colors border border-transparent text-white px-2.5 py-1.5 rounded-full bg-gray-900 hover:bg-gray-700 active:bg-gray-600 text-xs md:text-sm lg:px-4 lg:py-2.5 lg:text-base tracking-normal whitespace-nowrap cursor-pointer relative group overflow-visible"
-          >
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <GitHubLoginButton />
+            <Link
+              href="https://github.com/kartiklabhshetwar/foliox"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden md:flex items-center justify-center gap-1.5 outline-none transition-colors border border-transparent text-white px-2.5 py-1.5 rounded-full bg-gray-900 hover:bg-gray-700 active:bg-gray-600 text-xs md:text-sm lg:px-4 lg:py-2.5 lg:text-base tracking-normal whitespace-nowrap cursor-pointer relative group overflow-visible"
+            >
             <FaGithub className="h-4 w-4 relative z-10 transition-transform group-hover:scale-110" />
             <span className="relative z-10">GitHub</span>
             {displayedStars > 0 && (
@@ -175,14 +212,13 @@ export default function LandingPage() {
             <FaStar className="absolute h-2 w-2 text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -bottom-0.5 -left-0.5 animate-sparkle-float" style={{ animationDelay: '0.2s' }} />
             <FaStar className="absolute h-2.5 w-2.5 text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 top-1/2 -left-2 animate-sparkle" style={{ animationDelay: '0.4s' }} />
             <FaStar className="absolute h-2 w-2 text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500 top-1/2 -right-2 animate-sparkle-float" style={{ animationDelay: '0.6s' }} />
-          </Link>
-
-          <Link
-            href="https://github.com/kartiklabhshetwar/foliox"
-            target="_blank"
-            rel="noreferrer"
-            className="md:hidden flex items-center justify-center gap-1 outline-none transition-colors border border-transparent text-white px-2.5 py-1.5 rounded-full bg-gray-900 hover:bg-gray-700 active:bg-gray-600 text-xs tracking-normal whitespace-nowrap cursor-pointer mr-2.5 relative group overflow-visible"
-          >
+            </Link>
+            <Link
+              href="https://github.com/kartiklabhshetwar/foliox"
+              target="_blank"
+              rel="noreferrer"
+              className="md:hidden flex items-center justify-center gap-1 outline-none transition-colors border border-transparent text-white px-2.5 py-1.5 rounded-full bg-gray-900 hover:bg-gray-700 active:bg-gray-600 text-xs tracking-normal whitespace-nowrap cursor-pointer relative group overflow-visible"
+            >
             <FaGithub className="h-4 w-4 relative z-10 transition-transform group-hover:scale-110" />
             {displayedStars > 0 && (
               <span className="relative z-10 flex items-center gap-0.5 text-yellow-400 text-[10px] font-medium">
@@ -194,7 +230,8 @@ export default function LandingPage() {
             <FaStar className="absolute h-2 w-2 text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -bottom-0.5 -left-0.5 animate-sparkle-float" style={{ animationDelay: '0.2s' }} />
             <FaStar className="absolute h-2 w-2 text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 top-1/2 -left-2 animate-sparkle" style={{ animationDelay: '0.4s' }} />
             <FaStar className="absolute h-2 w-2 text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500 top-1/2 -right-2 animate-sparkle-float" style={{ animationDelay: '0.6s' }} />
-          </Link>
+            </Link>
+          </div>
         </div>
       </header>
 

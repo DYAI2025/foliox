@@ -5,18 +5,57 @@ import { ProjectScorer } from './project-scorer';
 import { LanguageRanker } from './language-ranker';
 import { graphql } from '@octokit/graphql';
 
-const graphqlWithAuth = Settings.GITHUB_TOKEN
-  ? graphql.defaults({
-      headers: {
-        authorization: `Bearer ${Settings.GITHUB_TOKEN}`,
-      },
-    })
-  : graphql;
+function getGraphQLClient(token: string) {
+  return graphql.defaults({
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+}
 
-const REPO_DETAILS_QUERY = `
+const REPO_DETAILS_QUERY_PUBLIC = `
   query($username: String!) {
     user(login: $username) {
       repositories(first: 100, privacy: PUBLIC, orderBy: {field: UPDATED_AT, direction: DESC}) {
+        nodes {
+          name
+          description
+          url
+          homepageUrl
+          stargazerCount
+          forkCount
+          primaryLanguage {
+            name
+            color
+          }
+          languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+          repositoryTopics(first: 10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          updatedAt
+          createdAt
+        }
+      }
+    }
+  }
+`;
+
+const REPO_DETAILS_QUERY_ALL = `
+  query($username: String!) {
+    user(login: $username) {
+      repositories(first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
         nodes {
           name
           description
@@ -85,16 +124,26 @@ interface GraphQLRepository {
 
 export class GitHubProjectRanker {
   private static async enrichRepositoriesWithGraphQL(
-    username: string
+    username: string,
+    userToken?: string | null
   ): Promise<Map<string, GraphQLRepository>> {
     try {
-      const result = await graphqlWithAuth<{
+      const token = userToken || Settings.GITHUB_TOKEN;
+      if (!token) {
+        return new Map();
+      }
+
+      const graphqlClient = getGraphQLClient(token);
+      const isAuthenticatedUser = userToken !== null;
+      const query = isAuthenticatedUser ? REPO_DETAILS_QUERY_ALL : REPO_DETAILS_QUERY_PUBLIC;
+
+      const result = await graphqlClient<{
         user: {
           repositories: {
             nodes: GraphQLRepository[];
           };
         } | null;
-      }>(REPO_DETAILS_QUERY, {
+      }>(query, {
         username,
       });
 
@@ -175,16 +224,17 @@ export class GitHubProjectRanker {
     };
   }
 
-  static async getFeatured(username: string): Promise<ProjectsData> {
-    if (!Settings.GITHUB_TOKEN) {
+  static async getFeatured(username: string, userToken?: string | null): Promise<ProjectsData> {
+    const token = userToken || Settings.GITHUB_TOKEN;
+    if (!token) {
       throw new Error(
-        'GITHUB_TOKEN is required. Please set it in your environment variables.'
+        'GITHUB_TOKEN is required. Please set it in your environment variables or authenticate.'
       );
     }
 
     try {
       const [allRepos, pinnedRepoNames] = await Promise.all([
-        GitHubRepositoryFetcher.fetchAllRepositories(username),
+        GitHubRepositoryFetcher.fetchAllRepositories(username, userToken),
         GitHubRepositoryFetcher.fetchPinnedRepositories(username),
       ]);
 
@@ -194,7 +244,7 @@ export class GitHubProjectRanker {
         8
       );
 
-      const gqlRepoMap = await this.enrichRepositoriesWithGraphQL(username);
+      const gqlRepoMap = await this.enrichRepositoriesWithGraphQL(username, userToken);
 
       const featured: FeaturedProject[] = topScoredRepos.map(repo =>
         this.convertToFeaturedProject(repo, gqlRepoMap.get(repo.name))

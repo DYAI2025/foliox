@@ -6,9 +6,10 @@ interface PopoverProps {
   trigger: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  align?: 'left' | 'right'
 }
 
-export function Popover({ children, trigger, open, onOpenChange }: PopoverProps) {
+export function Popover({ children, trigger, open, onOpenChange, align = 'left' }: PopoverProps) {
   const [isOpen, setIsOpen] = React.useState(open ?? false)
   const popoverRef = React.useRef<HTMLDivElement>(null)
 
@@ -47,6 +48,7 @@ export function Popover({ children, trigger, open, onOpenChange }: PopoverProps)
       {isOpen && (
         <div className={cn(
           "absolute z-50 mt-2 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95",
+          align === 'right' ? 'right-0' : 'left-0'
         )}>
           {children}
         </div>

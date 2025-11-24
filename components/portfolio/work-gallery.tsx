@@ -1,16 +1,21 @@
+'use client'
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FaExternalLinkAlt, FaGithub, FaStar, FaCodeBranch } from "react-icons/fa"
+import { FaExternalLinkAlt, FaGithub, FaStar, FaCodeBranch, FaChevronDown } from "react-icons/fa"
 import type { ProjectsData } from "@/types/github"
 import SectionBorder from "./section-border"
 import { ProjectImage } from "./project-image"
+import { useState } from "react"
 
 interface WorkGalleryProps {
   projects?: ProjectsData
 }
 
 export function WorkGallery({ projects }: WorkGalleryProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   if (!projects || projects.featured.length === 0) return null
 
   const totalBytes = projects.languages 
@@ -31,7 +36,7 @@ export function WorkGallery({ projects }: WorkGalleryProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {projects.featured.slice(0, 6).map((project) => {
+          {(isExpanded ? projects.featured : projects.featured.slice(0, 6)).map((project) => {
             const urlParts = project.url.split('/')
             const owner = urlParts[urlParts.length - 2]
             const repo = urlParts[urlParts.length - 1]
@@ -142,6 +147,24 @@ export function WorkGallery({ projects }: WorkGalleryProps) {
             )
           })}
         </div>
+
+        {projects.featured.length > 6 && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-md border-2 border-border hover:border-primary/20 hover:bg-muted/50 transition-colors group"
+            >
+              <FaChevronDown 
+                className={`h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-200 ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
+              />
+              <span className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                {isExpanded ? 'Show less' : `Show all ${projects.featured.length} projects`}
+              </span>
+            </button>
+          </div>
+        )}
 
         {projects.languages && Object.keys(projects.languages).length > 0 && (
           <Card className="border-border bg-card/50 backdrop-blur-sm">

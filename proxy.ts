@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_SITE_URL,
 ];
 
-const EXCLUDED_PATHS = ['/api/docs', '/api/openapi.json', '/api/screenshot', '/api/github/stars', '/_next', '/favicon.ico'];
+const EXCLUDED_PATHS = ['/api/docs', '/api/openapi.json', '/api/screenshot', '/api/github/stars', '/api/auth', '/_next', '/favicon.ico'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

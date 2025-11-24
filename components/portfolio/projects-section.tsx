@@ -1,15 +1,20 @@
+'use client'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BsStar, BsGit, BsBoxArrowUpRight } from "react-icons/bs"
-import { FaGithub } from "react-icons/fa"
+import { FaGithub, FaChevronDown } from "react-icons/fa"
 import type { ProjectsData } from "@/types/github"
 import { ProjectImage } from "./project-image"
+import { useState } from "react"
 
 interface ProjectsSectionProps {
   projects?: ProjectsData
 }
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   if (!projects || projects.featured.length === 0) return null
 
   return (
@@ -22,7 +27,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {projects.featured.slice(0, 6).map((project) => {
+        {(isExpanded ? projects.featured : projects.featured.slice(0, 6)).map((project) => {
           const urlParts = project.url.split('/')
           const owner = urlParts[urlParts.length - 2]
           const repo = urlParts[urlParts.length - 1]
@@ -114,6 +119,24 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
           )
         })}
       </div>
+
+      {projects.featured.length > 6 && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-md border-2 border-border hover:border-primary/20 hover:bg-muted/50 transition-colors group"
+          >
+            <FaChevronDown 
+              className={`h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-200 ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
+            />
+            <span className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+              {isExpanded ? 'Show less' : `Show all ${projects.featured.length} projects`}
+            </span>
+          </button>
+        </div>
+      )}
 
       {projects.languages && Object.keys(projects.languages).length > 0 && (
         <Card className="mt-6">
